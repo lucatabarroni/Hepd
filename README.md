@@ -40,6 +40,14 @@ Per i modelli bottle il layer iniziale ha 16 neuroni, mentre per i modelli funne
 N.B. per i modelli bottle e funnel non esistono i modelli con depth 20 e layer caratteristico 32. Questo perché con 20 layer, partendo da 16 per i modelli bottle o arrivando ai 16 neuroni per i modelli funnel, la variazione del numero di neuroni previsto per layer è inferiore ad 1 e quindi non è possibile creare quei due modelli. Il numero totale di modelli è quindi 120(bottle)+120(funnel)+121(constant) = 361
 
 
+La bdt è fatta con lightgbm con parametri:
+
+- no maximum depth
+- number of leaves 30
+- number of estimators 2500
+- learning rate 0.05
+
+
 
 
 

@@ -65,7 +65,7 @@ Questi tre parametri sono stati fatti variare per portare avanti uno studio sist
 - n_estimators = [30, 300, 3000]
 - num_leaves = [30, 300, 3000]
 
-Il numero totale di bdt quindi è 4*3*3 = 36 modelli. 
+Il numero totale di bdt quindi è 4x3x3 = 36 modelli. 
 
 
  

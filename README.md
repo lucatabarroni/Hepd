@@ -48,7 +48,7 @@ Per ogni modello FCNN abbiamo anche realizzato la versione ResNet aggiungendo le
 - le skip connections partono dall'output del secondo layer e finiscono nell'input del penultimo ( o terzultimo nel caso di profondità con numero dispari di layer)
 - in caso di varazione della dimensione tra input ed output del ResNet block (per i modelli bottle e funnel) abbiamo inserito un blocco denso sul ramo della skip connection per proiettare l'input sulla dimensione dell'output. Questi blocchi densi non hanno nessuna attivazione (funzione lineare)
 
-Per come vengono aggiunti i ResNet blocks, partendo dal secondo e arrivando al penultimo, questi non possono essere aggiunti alle architetture con depth pari a 4 e 5. Quinidi per le architetture bottle e funnel sono 9 diverse depth per 11 layer caratteristivi 9*11 = 99 modelli, meno quello con depth 20 e layer 32 quindi 98. Per i modelli Constant abbiamo le 9 profondità per 11 layer caratteristici 9*11 = 99 modelli. Il totale è 98+98+99 = 295 modelli ResNet. 
+Per come vengono aggiunti i ResNet blocks, partendo dal secondo e arrivando al penultimo, questi non possono essere aggiunti alle architetture con depth pari a 4 e 5. Quinidi per le architetture bottle e funnel sono 9 diverse depth per 11 layer caratteristivi 9x11 = 99 modelli, meno quello con depth 20 e layer 32 quindi 98. Per i modelli Constant abbiamo le 9 profondità per 11 layer caratteristici 9x11 = 99 modelli. Il totale è 98+98+99 = 295 modelli ResNet. 
 
 Quindi in totale abbiamo creato e trainato 361 FCNN + 295 FCNNResNet = 656 modelli Fully Connected.
 

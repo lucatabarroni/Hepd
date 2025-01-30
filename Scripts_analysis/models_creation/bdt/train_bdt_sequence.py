@@ -3,15 +3,18 @@ import os
 import pickle
 import joblib
 from tqdm import tqdm
+import warnings
 
 ### il learning rate è il medesimo per tutti i tree
 learning_rate = 0.05
 ### il tipo di boosting è il medesimo per tutti i tree
 boost_type = 'gbdt'
+### la loss è la medesima per tutti gli ensembles
+loss = 'binary_logloss'
 
 #### definiamo un intero train set 
 #### N.B. qui non abiamo un validation set che viene valutato durante il training
-#### per le BDT non utilizziamo il dataset non normalizzato
+#### per le BDT utilizziamo il dataset non normalizzato
 list_batch_data=os.listdir('/home/private/Hepd/Dataset_4/train/train_data/')
 batch_data=[]
 batch_labels=[]
@@ -22,16 +25,18 @@ for i in range(len(list_batch_data)):
         batch_labels.extend(pickle.load(f))
 
 # Definisci un callback per aggiornare la barra di avanzamento
-class TqdmCallback:
-    def __init__(self, total):
-        self.pbar = tqdm(total=total)
-    
+class TQDMProgressBar:
+    def __init__(self, total_iterations):
+        self.total_iterations = total_iterations
+        self.progress_bar = None
+
     def __call__(self, env):
-        self.pbar.update(1)
-        if env.iteration + 1 == env.end_iteration:
-            self.pbar.close()
-
-
+        if self.progress_bar is None:
+            self.progress_bar = tqdm(total=self.total_iterations, desc='Training Progress')
+        self.progress_bar.update(1)
+        if env.iteration + 1 == self.total_iterations:
+            self.progress_bar.close()
+            
 ### otteniamo la lista di tutti i modelli da trainare con i relativi path
 
 ### in path names ci sono tutte le cartelle con i nomi dei modelli da trainare
@@ -45,6 +50,7 @@ list_models = os.listdir(path_names)
 ### N. estimators : N1
 ### Max depth : N2
 ### N. leaves : N3
+### Min data in leaf : N4
 
 ### otteniamo i path delle cartelle in cui andreamo a lavorare
 list_dir_paths = [path_names+'/'+model_name+'/'+model_name for model_name in list_models]
@@ -67,14 +73,19 @@ for k,dir_path in enumerate(list_dir_paths) :
                 max_depth = int(line.split()[-1])
             if i == 2:
                 n_leaves = int(line.split()[-1])
+            if i == 3:
+                min_data_leaf = int(line.split()[-1])
     if n_estimators == -1:
         continue
     ### andiamo a creare una bdt con i parametri considerati
-    gbm = lgb.LGBMClassifier(boosting_type = boost_type, num_leaves = n_leaves, max_depth = max_depth, learning_rate = learning_rate, n_estimators=n_estimators, objective='binary')
+    ### mettendo verbose = -1 eliminiamo i warning
+    ### alcuni bdt potrebbero avere il warning: [LightGBM] [Warning] No further splits with positive gain, best gain: -inf
+    ### probabilmente deriva da valori di min_data_in_leaf troppo grandi
+    gbm = lgb.LGBMClassifier(boosting_type = boost_type, num_leaves = n_leaves, max_depth = max_depth, min_child_samples = min_data_leaf, learning_rate = learning_rate, n_estimators=n_estimators, objective='binary', metric = loss,verbose = -1)
     ### istanziamo il callback per avere la barra di avanzamento del fit
-    callbacks = [TqdmCallback(total=gbm.n_estimators),reset_parater]
+    progress_bar_callback = TQDMProgressBar(total_iterations=n_estimators)
     ### eseguiamo il fit
-    gbm.fit(batch_data,batch_labels, callbacks=callbacks)
+    gbm.fit(batch_data,batch_labels, callbacks = [progress_bar_callback])
     ### definiamo il percorso del file in cui salvare il modello trainato e ce lo salviamo
     model_path = dir_path+'_trained.pkl'
     joblib.dump(gbm, model_path)

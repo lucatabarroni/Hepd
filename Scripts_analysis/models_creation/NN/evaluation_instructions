@@ -1,8 +1,0 @@
-I moduli di evaluation vanno eseguiti nel seguente ordine:
-
-
-test_.py
-train_val_evaluation.py
-metrics_.py
-plots_.py
-max_roc_.py
